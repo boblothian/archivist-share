@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Archivist Shared Folder</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 40px; color: #333; }
+        .btn { display: inline-block; background: #007AFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px; font-weight: bold;}
+    </style>
+    <script>
+        window.onload = function() {
+            // 1. Get the data
+            var params = new URLSearchParams(window.location.search);
+            var data = params.get("data");
+            
+            // 2. Define Store URLs
+            var iosStore = "https://apps.apple.com/gb/app/archivist-browser/id6756570654";
+            var androidStore = "https://play.google.com/store/apps/details?id=com.monodivision.archivist&pcampaignid=web_share";
+            
+            // 3. Detect OS
+            var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+            var isAndroid = /android/i.test(userAgent);
+
+            // 4. Update the button on the page (in case redirect fails)
+            var btn = document.getElementById("dl-btn");
+            if (isIOS) {
+                btn.href = iosStore;
+                btn.innerText = "Download on App Store";
+            } else if (isAndroid) {
+                btn.href = androidStore;
+                btn.innerText = "Get it on Google Play";
+            }
+
+            // 5. Attempt automatic redirect after a moment
+            setTimeout(function() {
+                if (isIOS) window.location.href = iosStore;
+                else if (isAndroid) window.location.href = androidStore;
+            }, 1000); // Wait 1 second to give the app a chance to open if installed
+        };
+    </script>
+</head>
+<body>
+    <h1>Shared Folder</h1>
+    <p>Opening Archivist...</p>
+    <p>If the app doesn't open, click below:</p>
+    <a id="dl-btn" href="#" class="btn">Download App</a>
+</body>
+</html>
