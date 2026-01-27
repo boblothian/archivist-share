@@ -1,0 +1,9 @@
+        [{
+          "relation": ["delegate_permission/common.handle_all_urls"],
+          "target": {
+            "namespace": "android_app",
+            "package_name": "com.monodivision.archivist",
+            "sha256_cert_fingerprints": ["06:BD:11:19:73:22:03:06:6A:AE:3A:32:E0:59:24:E2:C2:E9:E9:86:16:BC:BA:1C:D1:78:6A:6C:C2:BA:B9:D2"]
+          }
+        }]
+        
