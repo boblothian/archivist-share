@@ -1,73 +1,47 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Archivist Shared Folder</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- OPEN GRAPH TAGS -->
+<meta property="og:title" content="Archivist Shared Folder" />
+<meta property="og:description" content="Click to import this folder into your Archivist app." />
+<meta property="og:image" content="https://boblothian.github.io/archivist-share/icon.png" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://boblothian.github.io/archivist-share" />
 
-    <!-- OPEN GRAPH TAGS (The Magic Part) -->
-    <!-- This title replaces the URL in the chat preview -->
-    <meta property="og:title" content="Archivist Shared Folder" />
-    
-    <!-- This description adds context -->
-    <meta property="og:description" content="Click to import this folder into your Archivist app." />
-    
-    <!-- This image will be the big clickable area. Use your App Icon URL here. -->
-    <!-- You can upload 'icon.png' to your GitHub repo and reference it. -->
-    <meta property="og:image" content="https://boblothian.github.io/archivist-share/icon.png" />
-    
-    <!-- Standard setup -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://boblothian.github.io/archivist-share" />
+<style>
+    body { font-family: sans-serif; text-align: center; padding: 40px; color: #333; }
+    .btn { display: inline-block; background: #007AFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px; font-weight: bold;}
+    img { width: 120px; height: 120px; margin-bottom: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+</style>
 
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 40px; color: #333; }
-        .btn { display: inline-block; background: #007AFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px; font-weight: bold;}
-        img { width: 120px; height: 120px; margin-bottom: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    </style>
-    
-    <script>
-        window.onload = function() {
-            var params = new URLSearchParams(window.location.search);
-            // We only need the data param to exist to attempt a redirect
-            var data = params.get("data");
+<script>
+    window.onload = function() {
+        var params = new URLSearchParams(window.location.search);
+        var data = params.get("data");
+        
+        var iosStore = "https://apps.apple.com/gb/app/archivist-browser/id6756570654";
+        var androidStore = "https://play.google.com/store/apps/details?id=com.monodivision.archivist&pcampaignid=web_share";
+        
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+        var isAndroid = /android/i.test(userAgent);
+
+        // 1. Setup the UI buttons
+        var btn = document.getElementById("dl-btn");
+        if (isIOS) {
+            btn.href = iosStore;
+            btn.innerText = "Download on App Store";
+        } else if (isAndroid) {
+            btn.href = androidStore;
+            btn.innerText = "Get it on Google Play";
+        }
+
+        // 2. Try to open the app via Custom Scheme immediately
+        // This is the "Fallback" that catches you if the Universal Link failed
+        if (data) {
+            // Construct the custom scheme URL
+            // archivist://shared-folder?data=...
+            var customScheme = "archivist://shared-folder?data=" + data;
             
-            var iosStore = "https://apps.apple.com/gb/app/archivist-browser/id6756570654";
-            var androidStore = "https://play.google.com/store/apps/details?id=com.monodivision.archivist&pcampaignid=web_share";
-            
-            var userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-            var isAndroid = /android/i.test(userAgent);
-
-            var btn = document.getElementById("dl-btn");
-            if (isIOS) {
-                btn.href = iosStore;
-                btn.innerText = "Download on App Store";
-            } else if (isAndroid) {
-                btn.href = androidStore;
-                btn.innerText = "Get it on Google Play";
-            }
-
-            // Attempt redirect after 500ms
-            setTimeout(function() {
-                // The intent filter on the phone should intercept this reload
-                // if the app is installed and verified.
-                if (isAndroid || isIOS) {
-                    // Just reloading might trigger the app intent if registered
-                    // Or we could try the custom scheme as a fallback:
-                    // window.location.href = "archivist://share" + window.location.search;
-                }
-            }, 500);
-        };
-    </script>
-</head>
-<body>
-    <!-- Display the icon here too for the web landing page -->
-    <img src="icon.png" alt="Archivist Logo" />
-    
-    <h1>Shared Folder</h1>
-    <p>To view this content, please open inside the Archivist App.</p>
-    
-    <a id="dl-btn" href="#" class="btn">Download App</a>
-</body>
-</html>
+            // Attempt to navigate to it
+            window.location.href = customScheme;
+        }
+    };
+</script>
