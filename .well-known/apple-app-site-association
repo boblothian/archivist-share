@@ -1,12 +1,12 @@
-        {
-          "applinks": {
-            "apps": [],
-            "details": [
-              {
-                "appID": "99J6R6T4SN.com.monodivision.archivist",
-                "paths": [ "*" ]
-              }
-            ]
+    {
+      "applinks": {
+        "apps": [],
+        "details": [
+          {
+            "appID": "99J6R6T4SN.com.monodivision.archivist",
+            "paths": [ "/archivist-share/*" ]
           }
-        }
-        
+        ]
+      }
+    }
+    
