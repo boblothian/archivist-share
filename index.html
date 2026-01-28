@@ -37,7 +37,7 @@
 
         <!-- This section is for MOBILE users -->
         <div id="mobile-view" style="display: none;">
-            <p>Attempting to open in Archivist...</p>
+            <p id="mobile-message">Attempting to open in Archivist...</p>
             <p style="font-size: 0.9em; color: #666;">If nothing happens, you may need to install the app first.</p>
             <a id="store-btn" href="#" class="btn">Download App</a>
         </div>
@@ -55,12 +55,9 @@
                 const decodedTitle = decodeURIComponent(title);
                 document.title = decodedTitle; // Update tab title
                 document.getElementById('main-header').innerText = decodedTitle; // Update H1
-                
-                // Update meta tags for rich previews
                 document.getElementById('og-title').setAttribute('content', decodedTitle);
                 document.getElementById('og-description').setAttribute('content', 'Contains a shared folder from Archivist. Click to import.');
             }
-            // Update the canonical URL for crawlers
             document.getElementById('og-url').setAttribute('content', currentUrl);
 
             const iosStore = "https://apps.apple.com/gb/app/archivist-browser/id6756570654";
@@ -73,30 +70,32 @@
                 // --- MOBILE LOGIC ---
                 document.getElementById('mobile-view').style.display = 'block';
                 const storeBtn = document.getElementById('store-btn');
-                
-                if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-                    storeBtn.href = iosStore;
-                } else {
-                    storeBtn.href = androidStore;
-                }
+                const storeUrl = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream ? iosStore : androidStore;
+                storeBtn.href = storeUrl;
 
-                // Try to redirect to the app using the custom scheme
                 if (data) {
                     let customSchemeUrl = "archivist://shared-folder?data=" + data;
                     if (title) {
-                        customSchemeUrl += "&title=" + title; // Pass title to the app
+                        customSchemeUrl += "&title=" + title;
                     }
-                    // Add a small delay for reliability
+                    
+                    // Attempt to open the app.
+                    window.location.href = customSchemeUrl;
+
+                    // Set a timeout to redirect to the store if the app doesn't open.
+                    // If the app opens, the browser tab becomes hidden, and this won't run.
                     setTimeout(function() {
-                        window.location.href = customSchemeUrl;
-                    }, 250);
+                        if (!document.hidden) {
+                            document.getElementById('mobile-message').innerText = 'App not found. Redirecting to store...';
+                            window.location.href = storeUrl;
+                        }
+                    }, 2500);
                 }
 
             } else {
                 // --- DESKTOP LOGIC ---
                 document.getElementById('desktop-view').style.display = 'block';
                 
-                // Generate a QR code pointing to the *current HTTPS link*
                 new QRCode(document.getElementById("qrcode"), {
                     text: currentUrl,
                     width: 200,
