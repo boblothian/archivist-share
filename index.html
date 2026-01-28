@@ -11,11 +11,6 @@
     img { width: 120px; height: 120px; margin-bottom: 20px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 </style>
 
-<!-- This new element will display a message to the user -->
-<div id="message" style="display: none; margin-top: 20px; padding: 10px; border-radius: 8px; background-color: #f0f0f0;">
-    <p>Trying to open Archivist... If the app doesn't open in a few seconds, you may not have it installed.</p>
-</div>
-
 <script>
     window.onload = function() {
         var params = new URLSearchParams(window.location.search);
@@ -28,38 +23,25 @@
         var isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
         var isAndroid = /android/i.test(userAgent);
 
-        var storeUrl = "";
+        // 1. Setup the UI buttons
         var btn = document.getElementById("dl-btn");
         if (isIOS) {
             btn.href = iosStore;
-            storeUrl = iosStore;
             btn.innerText = "Download on App Store";
         } else if (isAndroid) {
             btn.href = androidStore;
-            storeUrl = androidStore;
             btn.innerText = "Get it on Google Play";
         }
 
-        // Try to open the app and set up fallback
+        // 2. Try to open the app via Custom Scheme immediately
+        // This is the "Fallback" that catches you if the Universal Link failed
         if (data) {
+            // Construct the custom scheme URL
+            // archivist://shared-folder?data=...
             var customScheme = "archivist://shared-folder?data=" + data;
             
-            // Show the message element
-            var messageEl = document.getElementById("message");
-            if (messageEl) {
-                messageEl.style.display = 'block';
-            }
-            
-            // Attempt to navigate to the custom scheme
+            // Attempt to navigate to it
             window.location.href = customScheme;
-            
-            // Fallback to the appropriate app store after 15 seconds
-            setTimeout(function() {
-                // If the user is still on this page, the app likely didn't open.
-                if (storeUrl) {
-                    window.location.href = storeUrl;
-                }
-            }, 15000); // 15 seconds
         }
     };
 </script>
