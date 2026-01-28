@@ -4,99 +4,77 @@
     <title>Archivist Shared Folder</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    
     <!-- Open Graph Tags for Rich Previews in Messengers -->
-    <meta id="og-title" property="og:title" content="Archivist Shared Folder" />
-    <meta id="og-description" property="og:description" content="Click to view this folder in the Archivist app." />
+    <meta property="og:title" content="Archivist Shared Folder" />
+    <meta property="og:description" content="Click to view this folder in the Archivist app." />
     <meta property="og:image" content="https://boblothian.github.io/archivist-share/icon.png" />
     <meta property="og:type" content="website" />
-    <meta id="og-url" property="og:url" content="https://boblothian.github.io/archivist-share" />
+    <meta property="og:url" content="https://boblothian.github.io/archivist-share" />
 
     <!-- Style for the fallback page -->
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif; text-align: center; padding: 40px; color: #333; background-color: #f4f4f9; }
         .container { max-width: 600px; margin: 0 auto; }
-        .btn { display: inline-block; background-color: #007AFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin-top: 20px; font-weight: bold; }
+        .btn { display: inline-block; background-color: #007AFF; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; margin-top: 20px; font-weight: bold; font-size: 16px; }
+        .sub-link { font-size: 14px; color: #555; display: block; margin-top: 24px; }
         .qr-container { background-color: white; padding: 20px; border-radius: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        img { width: 120px; height: 120px; margin-bottom: 20px; border-radius: 20px; }
+        img.logo { width: 120px; height: 120px; margin-bottom: 20px; border-radius: 20px; }
     </style>
-
+    
     <!-- Library to generate QR codes on the webpage -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <img src="icon.png" alt="Archivist Logo" />
-        <h1 id="main-header">Shared Folder</h1>
-
+        <img src="icon.png" alt="Archivist Logo" class="logo" />
+        <h1>Shared Folder</h1>
+        
         <!-- This section is for DESKTOP users -->
         <div id="desktop-view" style="display: none;">
-            <p>Scan the QR code with your phone's camera or the Archivist app to import this folder.</p>
+            <p>Scan the QR code with your phone to import this folder.</p>
             <div id="qrcode" class="qr-container"></div>
         </div>
 
         <!-- This section is for MOBILE users -->
         <div id="mobile-view" style="display: none;">
-            <p id="mobile-message">Attempting to open in Archivist...</p>
-            <p style="font-size: 0.9em; color: #666;">If nothing happens, you may need to install the app first.</p>
-            <a id="store-btn" href="#" class="btn">Download App</a>
+            <p>Ready to import into Archivist.</p>
+            <a id="open-btn" href="#" class="btn">Open In App</a>
+            <a id="store-btn" href="#" class="sub-link">Don't have the app? Download it.</a>
         </div>
     </div>
 
     <script>
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
-            // *** FIX: Read 'gist' parameter, not 'data' ***
-            const gistId = params.get("gist"); 
-            const title = params.get("title");
-            const currentUrl = window.location.href;
-
-            // --- DYNAMIC CONTENT UPDATE ---
-            if (title) {
-                const decodedTitle = decodeURIComponent(title);
-                document.title = decodedTitle;
-                document.getElementById('main-header').innerText = decodedTitle;
-                document.getElementById('og-title').setAttribute('content', decodedTitle);
-                document.getElementById('og-description').setAttribute('content', 'Contains a shared folder from Archivist. Click to import.');
-            }
-            document.getElementById('og-url').setAttribute('content', currentUrl);
-
-            const iosStore = "https://apps.apple.com/gb/app/archivist-browser/id6756570654";
-            const androidStore = "https://play.google.com/store/apps/details?id=com.monodivision.archivist&pcampaignid=web_share";
-
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+            const data = params.get("data");
+            const isMobile = /Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
             if (isMobile) {
                 // --- MOBILE LOGIC ---
                 document.getElementById('mobile-view').style.display = 'block';
+                
+                // Set the "Open In App" button link
+                if (data) {
+                    document.getElementById('open-btn').href = "archivist://shared-folder?data=" + data;
+                }
+
+                // Set the correct store link for the "Download" button
                 const storeBtn = document.getElementById('store-btn');
-                const storeUrl = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream ? iosStore : androidStore;
-                storeBtn.href = storeUrl;
-
-                // *** FIX: Check for gistId and build the correct URL ***
-                if (gistId) {
-                    let customSchemeUrl = "archivist://shared-folder?gist=" + gistId;
-                    if (title) {
-                        customSchemeUrl += "&title=" + title;
-                    }
-                    
-                    window.location.href = customSchemeUrl;
-
-                    setTimeout(function() {
-                        if (!document.hidden) {
-                            document.getElementById('mobile-message').innerText = 'App not found. Redirecting to store...';
-                            window.location.href = storeUrl;
-                        }
-                    }, 2500);
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (isIOS) {
+                    storeBtn.href = "https://apps.apple.com/gb/app/archivist-browser/id6756570654";
+                } else {
+                    storeBtn.href = "https://play.google.com/store/apps/details?id=com.monodivision.archivist&pcampaignid=web_share";
                 }
 
             } else {
                 // --- DESKTOP LOGIC ---
                 document.getElementById('desktop-view').style.display = 'block';
                 
+                // Generate a QR code pointing to the full HTTPS link
                 new QRCode(document.getElementById("qrcode"), {
-                    text: currentUrl,
+                    text: window.location.href,
                     width: 200,
                     height: 200,
                     correctLevel: QRCode.CorrectLevel.L
