@@ -46,15 +46,16 @@
     <script>
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
-            const data = params.get("data");
+            // *** FIX: Read 'gist' parameter, not 'data' ***
+            const gistId = params.get("gist"); 
             const title = params.get("title");
             const currentUrl = window.location.href;
 
             // --- DYNAMIC CONTENT UPDATE ---
             if (title) {
                 const decodedTitle = decodeURIComponent(title);
-                document.title = decodedTitle; // Update tab title
-                document.getElementById('main-header').innerText = decodedTitle; // Update H1
+                document.title = decodedTitle;
+                document.getElementById('main-header').innerText = decodedTitle;
                 document.getElementById('og-title').setAttribute('content', decodedTitle);
                 document.getElementById('og-description').setAttribute('content', 'Contains a shared folder from Archivist. Click to import.');
             }
@@ -73,17 +74,15 @@
                 const storeUrl = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream ? iosStore : androidStore;
                 storeBtn.href = storeUrl;
 
-                if (data) {
-                    let customSchemeUrl = "archivist://shared-folder?data=" + data;
+                // *** FIX: Check for gistId and build the correct URL ***
+                if (gistId) {
+                    let customSchemeUrl = "archivist://shared-folder?gist=" + gistId;
                     if (title) {
                         customSchemeUrl += "&title=" + title;
                     }
                     
-                    // Attempt to open the app.
                     window.location.href = customSchemeUrl;
 
-                    // Set a timeout to redirect to the store if the app doesn't open.
-                    // If the app opens, the browser tab becomes hidden, and this won't run.
                     setTimeout(function() {
                         if (!document.hidden) {
                             document.getElementById('mobile-message').innerText = 'App not found. Redirecting to store...';
