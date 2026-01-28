@@ -4,13 +4,13 @@
     <title>Archivist Shared Folder</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     <!-- Open Graph Tags for Rich Previews in Messengers -->
-    <meta property="og:title" content="Archivist Shared Folder" />
-    <meta property="og:description" content="Click to view this folder in the Archivist app." />
+    <meta id="og-title" property="og:title" content="Archivist Shared Folder" />
+    <meta id="og-description" property="og:description" content="Click to view this folder in the Archivist app." />
     <meta property="og:image" content="https://boblothian.github.io/archivist-share/icon.png" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://boblothian.github.io/archivist-share" />
+    <meta id="og-url" property="og:url" content="https://boblothian.github.io/archivist-share" />
 
     <!-- Style for the fallback page -->
     <style>
@@ -20,15 +20,15 @@
         .qr-container { background-color: white; padding: 20px; border-radius: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         img { width: 120px; height: 120px; margin-bottom: 20px; border-radius: 20px; }
     </style>
-    
+
     <!-- Library to generate QR codes on the webpage -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
         <img src="icon.png" alt="Archivist Logo" />
-        <h1>Shared Folder</h1>
-        
+        <h1 id="main-header">Shared Folder</h1>
+
         <!-- This section is for DESKTOP users -->
         <div id="desktop-view" style="display: none;">
             <p>Scan the QR code with your phone's camera or the Archivist app to import this folder.</p>
@@ -47,6 +47,21 @@
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
             const data = params.get("data");
+            const title = params.get("title");
+            const currentUrl = window.location.href;
+
+            // --- DYNAMIC CONTENT UPDATE ---
+            if (title) {
+                const decodedTitle = decodeURIComponent(title);
+                document.title = decodedTitle; // Update tab title
+                document.getElementById('main-header').innerText = decodedTitle; // Update H1
+                
+                // Update meta tags for rich previews
+                document.getElementById('og-title').setAttribute('content', decodedTitle);
+                document.getElementById('og-description').setAttribute('content', 'Contains a shared folder from Archivist. Click to import.');
+            }
+            // Update the canonical URL for crawlers
+            document.getElementById('og-url').setAttribute('content', currentUrl);
 
             const iosStore = "https://apps.apple.com/gb/app/archivist-browser/id6756570654";
             const androidStore = "https://play.google.com/store/apps/details?id=com.monodivision.archivist&pcampaignid=web_share";
@@ -67,8 +82,14 @@
 
                 // Try to redirect to the app using the custom scheme
                 if (data) {
-                    const customSchemeUrl = "archivist://shared-folder?data=" + data;
-                    window.location.href = customSchemeUrl;
+                    let customSchemeUrl = "archivist://shared-folder?data=" + data;
+                    if (title) {
+                        customSchemeUrl += "&title=" + title; // Pass title to the app
+                    }
+                    // Add a small delay for reliability
+                    setTimeout(function() {
+                        window.location.href = customSchemeUrl;
+                    }, 250);
                 }
 
             } else {
@@ -76,9 +97,8 @@
                 document.getElementById('desktop-view').style.display = 'block';
                 
                 // Generate a QR code pointing to the *current HTTPS link*
-                // so a mobile phone can scan it.
                 new QRCode(document.getElementById("qrcode"), {
-                    text: window.location.href,
+                    text: currentUrl,
                     width: 200,
                     height: 200,
                     correctLevel: QRCode.CorrectLevel.L
